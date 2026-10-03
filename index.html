@@ -703,15 +703,22 @@ async function sendGameToBackend(
   const initData =
     getTelegramInitData();
 
-  if (!initData) {
+if (!initData) {
 
-    console.log(
-      'Telegram initData mavjud emas'
-    );
+  console.log(
+    'Telegram initData mavjud emas'
+  );
 
-    return;
+  alert('SERVER TEST: Telegram initData mavjud emas');
 
-  }
+  return;
+
+}
+
+console.log(
+  'SERVER TEST: initData mavjud, uzunligi =',
+  initData.length
+);
 
   try {
 
