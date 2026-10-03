@@ -4,22 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>1 SECOND</title>
-
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
 <style>
-:root {
-  color-scheme: dark light;
-}
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
 
-* {
-  box-sizing: border-box;
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: #fff;
 }
 
 body {
-  margin: 0;
   min-height: 100vh;
   font-family: Arial, sans-serif;
+  color: #111;
+}
+
+button {
+  font: inherit;
 }
 
 #app {
@@ -28,9 +31,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #fff;
-  color: #111;
-  padding: 24px;
+  background: #fff;
+  padding: 24px 16px;
 }
 
 .game {
@@ -50,6 +52,13 @@ h1 {
   font-size: 12px;
   letter-spacing: 3px;
   margin-bottom: 30px;
+}
+
+.player {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 18px;
+  opacity: .7;
 }
 
 .label {
@@ -80,11 +89,10 @@ h1 {
   letter-spacing: 3px;
   cursor: pointer;
   touch-action: manipulation;
-  transition:
-    background .15s,
-    border-color .15s,
-    transform .08s,
-    box-shadow .15s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background .15s, border-color .15s, transform .08s, box-shadow .15s;
 }
 
 #tap:active {
@@ -119,6 +127,14 @@ h1 {
   word-break: break-word;
 }
 
+.server-status {
+  min-height: 18px;
+  margin-top: 5px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  opacity: .5;
+}
+
 .stats {
   display: flex;
   justify-content: center;
@@ -139,24 +155,12 @@ h1 {
   letter-spacing: 2px;
 }
 
-.hint {
-  margin-top: 24px;
-  font-size: 11px;
-  opacity: .45;
-}
-
-.author {
-  margin-top: 18px;
-  font-size: 9px;
-  letter-spacing: 3px;
-  opacity: .35;
-}
-
 .history-panel {
   margin-top: 28px;
 }
 
-.history-title {
+.history-title,
+.leaderboard-title {
   text-align: center;
   font-size: 10px;
   letter-spacing: 3px;
@@ -203,17 +207,10 @@ h1 {
   text-align: left;
 }
 
-.leaderboard-title {
-  text-align: center;
-  font-size: 10px;
-  letter-spacing: 3px;
-  opacity: .5;
-  margin-bottom: 10px;
-}
-
 .leader-row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 8px 12px;
   border-bottom: 1px solid rgba(0,0,0,.08);
   font-size: 12px;
@@ -275,6 +272,19 @@ h1 {
   text-align: center;
 }
 
+.hint {
+  margin-top: 24px;
+  font-size: 11px;
+  opacity: .45;
+}
+
+.author {
+  margin-top: 18px;
+  font-size: 9px;
+  letter-spacing: 3px;
+  opacity: .35;
+}
+
 @media (max-width: 420px) {
   #app {
     padding: 18px 12px;
@@ -298,370 +308,288 @@ h1 {
 </head>
 
 <body>
-
 <div id="app">
-
   <main class="game">
-
     <h1>1 SECOND</h1>
+    <div class="sub">CAN YOU STOP AT ONE?</div>
 
-    <div class="sub">
-      CAN YOU STOP AT ONE?
-    </div>
+    <div id="player" class="player">PLAYER: Guest</div>
 
-    <div
-      id="player"
-      style="font-size:13px;font-weight:700;margin-bottom:18px;opacity:.7"
-    >
-      PLAYER: Guest
-    </div>
+    <div class="label">TIME</div>
+    <div id="timer" class="timer">0.000</div>
 
-    <div class="label">
-      TIME
-    </div>
-
-    <div
-      class="timer"
-      id="timer"
-    >
-      0.000
-    </div>
-
-    <button
-      id="tap"
-      aria-label="Start and stop"
-      type="button"
-    >
+    <button id="tap" type="button" aria-label="Start and stop">
       START
     </button>
 
-    <div
-      class="result"
-      id="result"
-    >
-      1.000 sekundni ushla
-    </div>
+    <div id="result" class="result">1.000 sekundni ushla</div>
+    <div id="serverStatus" class="server-status" aria-live="polite"></div>
 
     <div class="history-panel">
-
-      <div class="history-title">
-        HISTORY
+      <div class="history-title">HISTORY</div>
+      <div id="history" class="history-list">
+        <div class="history-empty">Hali urinishlar yo‘q</div>
       </div>
-
-      <div
-        id="history"
-        class="history-list"
-      >
-        <div class="history-empty">
-          Hali urinishlar yo‘q
-        </div>
-      </div>
-
     </div>
 
     <div class="stats">
-
       <div class="stat">
         <b id="best">—</b>
         <span>BEST</span>
       </div>
-
       <div class="stat">
         <b id="attempts">0</b>
         <span>ATTEMPTS</span>
       </div>
-
       <div class="stat">
         <b id="combo">0</b>
         <span>COMBO</span>
       </div>
-
       <div class="stat">
         <b id="bestCombo">0</b>
         <span>BEST COMBO</span>
       </div>
-
     </div>
 
     <div class="leaderboard">
-
-      <div class="leaderboard-title">
-        PLAYER RECORDS
-      </div>
-
+      <div class="leaderboard-title">PLAYER RECORDS · LOCAL</div>
       <div id="leaderboard">
-        <div class="history-empty">
-          Hali rekordlar yo‘q
-        </div>
+        <div class="history-empty">Hali rekordlar yo‘q</div>
       </div>
-
     </div>
 
     <div class="admin-panel">
-
-      <div class="admin-title">
-        ADMIN PANEL · LOCAL PREVIEW
-      </div>
+      <div class="admin-title">ADMIN PANEL · LOCAL PREVIEW</div>
 
       <div class="admin-grid">
-
         <div class="admin-card">
           <b id="adminUsers">0</b>
           <span>PLAYERS</span>
         </div>
-
         <div class="admin-card">
           <b id="adminGames">0</b>
           <span>GAMES</span>
         </div>
-
         <div class="admin-card">
           <b id="adminSuccess">0</b>
           <span>SUCCESSFUL</span>
         </div>
-
         <div class="admin-card">
           <b id="adminBestCombo">0</b>
           <span>BEST COMBO</span>
         </div>
-
       </div>
 
       <div class="admin-note">
-        Hozircha preview rejimi: statistika shu qurilmadagi ma’lumotlardan olinadi.
-        Global foydalanuvchilar uchun server + database ulanadi.
+        Bu panel hozircha shu qurilmadagi local ma’lumotlarni ko‘rsatadi.
+        Global leaderboard uchun keyingi bosqichda serverdan o‘qish qo‘shiladi.
       </div>
-
     </div>
 
-    <div class="hint">
-      Telefon: TAP · Kompyuter: CLICK / SPACE
-    </div>
-
-    <div class="author">
-      by S R B
-    </div>
-
+    <div class="hint">Telefon: TAP · Kompyuter: CLICK / SPACE</div>
+    <div class="author">by S R B</div>
   </main>
-
 </div>
 
 <script>
+'use strict';
 
 /* =========================================================
-   SUPABASE / BACKEND
+   CONFIG
 ========================================================= */
 
-const SUPABASE_URL =
-  'https://pqqroisbizxagbuwmldi.supabase.co';
+const SUPABASE_URL = 'https://pqqroisbizxagbuwmldi.supabase.co';
+const GAME_API_URL = SUPABASE_URL + '/functions/v1/game-api';
 
-const GAME_API_URL =
-  SUPABASE_URL + '/functions/v1/game-api';
-
-
-/* =========================================================
-   TELEGRAM WEB APP
-========================================================= */
-
-function initTelegram() {
-
-  try {
-
-    if (
-      window.Telegram &&
-      window.Telegram.WebApp
-    ) {
-
-      const tg = window.Telegram.WebApp;
-
-      tg.ready();
-
-      tg.expand();
-
-      console.log(
-        'Telegram WebApp ishga tushdi'
-      );
-
-      console.log(
-        'Telegram initData:',
-        tg.initData
-      );
-
-    } else {
-
-      console.log(
-        'Telegram WebApp mavjud emas'
-      );
-
-    }
-
-  } catch (e) {
-
-    console.error(
-      'Telegram init xatosi:',
-      e
-    );
-
-  }
-
-}
-
-initTelegram();
-
+const STORAGE_KEY = 'oneSecondGame';
+const TOLERANCE = 0.010;
+const MIN_SUCCESS_TIME = 1.000 - TOLERANCE;
+const MAX_SUCCESS_TIME = 1.000 + TOLERANCE;
 
 /* =========================================================
    DOM
 ========================================================= */
 
-const tap =
-  document.getElementById('tap');
-
-const timer =
-  document.getElementById('timer');
-
-const result =
-  document.getElementById('result');
-
-const bestEl =
-  document.getElementById('best');
-
-const attemptsEl =
-  document.getElementById('attempts');
-
-const comboEl =
-  document.getElementById('combo');
-
-const bestComboEl =
-  document.getElementById('bestCombo');
-
+const tap = document.getElementById('tap');
+const timer = document.getElementById('timer');
+const result = document.getElementById('result');
+const serverStatus = document.getElementById('serverStatus');
+const playerEl = document.getElementById('player');
+const bestEl = document.getElementById('best');
+const attemptsEl = document.getElementById('attempts');
+const comboEl = document.getElementById('combo');
+const bestComboEl = document.getElementById('bestCombo');
+const historyEl = document.getElementById('history');
+const leaderboardEl = document.getElementById('leaderboard');
 
 /* =========================================================
-   GAME SETTINGS
-========================================================= */
-
-const TOLERANCE = 0.010;
-
-/*
-  SUCCESS:
-  0.990
-  0.991
-  ...
-  1.000
-  ...
-  1.009
-  1.010
-*/
-
-const MIN_SUCCESS_TIME =
-  1.000 - TOLERANCE;
-
-const MAX_SUCCESS_TIME =
-  1.000 + TOLERANCE;
-
-
-/* =========================================================
-   GAME VARIABLES
+   GAME STATE
 ========================================================= */
 
 let running = false;
-
 let startTime = 0;
-
-let raf = 0;
+let animationFrame = 0;
 
 let best = null;
-
 let attempts = 0;
-
 let history = [];
-
 let combo = 0;
-
 let bestCombo = 0;
-
 let playerRecords = {};
 
+/* =========================================================
+   TELEGRAM
+========================================================= */
+
+function initTelegram() {
+  try {
+    if (!window.Telegram || !window.Telegram.WebApp) {
+      console.log('Telegram WebApp mavjud emas');
+      return null;
+    }
+
+    const tg = window.Telegram.WebApp;
+
+    tg.ready();
+    tg.expand();
+
+    console.log('Telegram WebApp ishga tushdi');
+    console.log('Telegram initData mavjud:', Boolean(tg.initData));
+
+    return tg;
+  } catch (error) {
+    console.error('Telegram init xatosi:', error);
+    return null;
+  }
+}
+
+function getTelegramUser() {
+  try {
+    const tg = window.Telegram && window.Telegram.WebApp;
+
+    if (!tg || !tg.initDataUnsafe) {
+      return null;
+    }
+
+    return tg.initDataUnsafe.user || null;
+  } catch (error) {
+    console.error('Telegram user olish xatosi:', error);
+    return null;
+  }
+}
+
+function getTelegramInitData() {
+  try {
+    const tg = window.Telegram && window.Telegram.WebApp;
+
+    if (!tg) {
+      return '';
+    }
+
+    return typeof tg.initData === 'string' ? tg.initData : '';
+  } catch (error) {
+    console.error('initData olish xatosi:', error);
+    return '';
+  }
+}
+
+function getPlayerName() {
+  const user = getTelegramUser();
+
+  if (!user) {
+    return 'Guest';
+  }
+
+  if (user.username) {
+    return '@' + user.username;
+  }
+
+  const fullName = [user.first_name, user.last_name]
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+
+  return fullName || 'Guest';
+}
+
+function loadTelegramPlayer() {
+  const name = getPlayerName();
+
+  playerEl.textContent = 'PLAYER: ' + name;
+}
 
 /* =========================================================
    LOCAL STORAGE
 ========================================================= */
 
 function saveGame() {
-
   try {
-
     localStorage.setItem(
-      'oneSecondGame',
+      STORAGE_KEY,
       JSON.stringify({
-
-        best: best,
-
-        attempts: attempts,
-
-        history: history,
-
-        combo: combo,
-
-        bestCombo: bestCombo,
-
-        playerRecords: playerRecords
-
+        best,
+        attempts,
+        history,
+        combo,
+        bestCombo,
+        playerRecords
       })
     );
-
-  } catch (e) {
-
-    console.log(
-      'LocalStorage save xatosi:',
-      e
-    );
-
+  } catch (error) {
+    console.log('LocalStorage save xatosi:', error);
   }
-
 }
 
-
 function loadGame() {
-
   try {
-
-    const raw =
-      localStorage.getItem(
-        'oneSecondGame'
-      );
+    const raw = localStorage.getItem(STORAGE_KEY);
 
     if (!raw) {
+      renderAll();
       return;
     }
 
-    const saved =
-      JSON.parse(raw);
+    const saved = JSON.parse(raw);
 
-    if (!saved) {
+    if (!saved || typeof saved !== 'object') {
+      renderAll();
       return;
     }
 
     best =
-      saved.best ?? null;
+      saved.best !== null &&
+      Number.isFinite(Number(saved.best))
+        ? Number(saved.best)
+        : null;
 
     attempts =
-      Number.isFinite(saved.attempts)
-        ? saved.attempts
+      Number.isFinite(Number(saved.attempts))
+        ? Math.max(0, Number(saved.attempts))
         : 0;
 
     history =
       Array.isArray(saved.history)
         ? saved.history
+            .filter(
+              item =>
+                item &&
+                Number.isFinite(Number(item.time))
+            )
+            .slice(0, 50)
+            .map(item => ({
+              time: Number(item.time),
+              success: Boolean(item.success)
+            }))
         : [];
 
     combo =
-      Number.isFinite(saved.combo)
-        ? saved.combo
+      Number.isFinite(Number(saved.combo))
+        ? Math.max(0, Number(saved.combo))
         : 0;
 
     bestCombo =
-      Number.isFinite(saved.bestCombo)
-        ? saved.bestCombo
+      Number.isFinite(Number(saved.bestCombo))
+        ? Math.max(0, Number(saved.bestCombo))
         : 0;
 
     playerRecords =
@@ -670,320 +598,433 @@ function loadGame() {
         ? saved.playerRecords
         : {};
 
-
-    if (best !== null) {
-
-      bestEl.textContent =
-        Number(best).toFixed(3) + 's';
-
-    }
-
-    attemptsEl.textContent =
-      attempts;
-
-    comboEl.textContent =
-      combo;
-
-    bestComboEl.textContent =
-      bestCombo;
-
-    renderHistory();
-
-    renderLeaderboard();
-
-  } catch (e) {
-
-    console.log(
-      'LocalStorage load xatosi:',
-      e
-    );
-
+    renderAll();
+  } catch (error) {
+    console.log('LocalStorage load xatosi:', error);
+    renderAll();
   }
-
 }
-
 
 /* =========================================================
-   TELEGRAM USER
+   UI HELPERS
 ========================================================= */
 
-function getTelegramUser() {
+function display(time) {
+  const safeTime =
+    Number.isFinite(time) && time >= 0
+      ? time
+      : 0;
 
-  try {
-
-    if (
-      !window.Telegram ||
-      !window.Telegram.WebApp
-    ) {
-      return null;
-    }
-
-    const user =
-      window.Telegram.WebApp
-        .initDataUnsafe
-        .user;
-
-    return user || null;
-
-  } catch (e) {
-
-    console.error(
-      'Telegram user olish xatosi:',
-      e
-    );
-
-    return null;
-
-  }
-
+  timer.textContent = safeTime.toFixed(3);
 }
 
+function resetVisual() {
+  tap.className = '';
+  tap.textContent = 'START';
+  result.textContent = '1.000 sekundni ushla';
+}
 
-function loadTelegramPlayer() {
+function setServerStatus(message) {
+  serverStatus.textContent = message || '';
+}
 
-  try {
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
-    const user =
-      getTelegramUser();
+function renderHistory() {
+  if (!history.length) {
+    historyEl.innerHTML =
+      '<div class="history-empty">Hali urinishlar yo‘q</div>';
+    return;
+  }
 
-    if (!user) {
+  historyEl.innerHTML = history
+    .map((item, index) => {
+      const time = Number(item.time);
+      const success = Boolean(item.success);
 
-      console.log(
-        'Telegram user topilmadi'
+      return (
+        '<div class="history-row">' +
+          '<span>#' +
+            (history.length - index) +
+            ' -</span>' +
+          '<b class="' +
+            (success ? 'ok' : 'bad') +
+            '">' +
+            time.toFixed(3) +
+          '</b>' +
+          '<span style="margin-left:10px">' +
+            'sekund ' +
+            (success ? '🟢' : '🔴') +
+          '</span>' +
+        '</div>'
       );
+    })
+    .join('');
+}
 
+function renderLeaderboard() {
+  const rows = Object.entries(playerRecords)
+    .map(([name, record]) => ({
+      name,
+      attempts:
+        Number(record.attempts) || 0,
+      successes:
+        Number(record.successes) || 0,
+      best:
+        Number.isFinite(Number(record.best))
+          ? Number(record.best)
+          : 999
+    }))
+    .sort((a, b) => {
+      if (b.successes !== a.successes) {
+        return b.successes - a.successes;
+      }
+
+      return a.best - b.best;
+    })
+    .slice(0, 10);
+
+  if (!rows.length) {
+    leaderboardEl.innerHTML =
+      '<div class="history-empty">Hali rekordlar yo‘q</div>';
+
+    renderAdmin();
+    return;
+  }
+
+  leaderboardEl.innerHTML = rows
+    .map((entry, index) => {
+      return (
+        '<div class="leader-row">' +
+          '<span>#' +
+            (index + 1) +
+            ' ' +
+            escapeHtml(entry.name) +
+          '</span>' +
+          '<b>' +
+            entry.successes +
+            ' ta · ' +
+            entry.best.toFixed(3) +
+            's' +
+          '</b>' +
+        '</div>'
+      );
+    })
+    .join('');
+
+  renderAdmin();
+}
+
+function renderAdmin() {
+  const users =
+    Object.keys(playerRecords).length;
+
+  const games =
+    Object.values(playerRecords)
+      .reduce((sum, record) => {
+        return (
+          sum +
+          (Number(record.attempts) || 0)
+        );
+      }, 0);
+
+  const successful =
+    Object.values(playerRecords)
+      .reduce((sum, record) => {
+        return (
+          sum +
+          (Number(record.successes) || 0)
+        );
+      }, 0);
+
+  document.getElementById('adminUsers').textContent =
+    users;
+
+  document.getElementById('adminGames').textContent =
+    games;
+
+  document.getElementById('adminSuccess').textContent =
+    successful;
+
+  document.getElementById('adminBestCombo').textContent =
+    bestCombo;
+}
+
+function renderStats() {
+  bestEl.textContent =
+    best === null
+      ? '—'
+      : Number(best).toFixed(3) + 's';
+
+  attemptsEl.textContent = attempts;
+  comboEl.textContent = combo;
+  bestComboEl.textContent = bestCombo;
+}
+
+function renderAll() {
+  renderStats();
+  renderHistory();
+  renderLeaderboard();
+}
+
+/* =========================================================
+   TIMER
+========================================================= */
+
+function tick() {
+  if (!running) {
+    return;
+  }
+
+  const elapsed =
+    (performance.now() - startTime) / 1000;
+
+  display(elapsed);
+
+  animationFrame =
+    requestAnimationFrame(tick);
+}
+
+function startGame() {
+  if (running) {
+    return;
+  }
+
+  running = true;
+  startTime = performance.now();
+
+  cancelAnimationFrame(animationFrame);
+
+  tap.className = 'running';
+  tap.textContent = 'STOP';
+  result.textContent = '...';
+  setServerStatus('');
+
+  animationFrame =
+    requestAnimationFrame(tick);
+}
+
+function stopGame() {
+  if (!running) {
+    return;
+  }
+
+  running = false;
+
+  cancelAnimationFrame(animationFrame);
+
+  const elapsed =
+    (performance.now() - startTime) / 1000;
+
+  display(elapsed);
+
+  attempts += 1;
+
+  const success =
+    elapsed >= MIN_SUCCESS_TIME &&
+    elapsed <= MAX_SUCCESS_TIME;
+
+  history.unshift({
+    time: elapsed,
+    success
+  });
+
+  if (history.length > 50) {
+    history.length = 50;
+  }
+
+  if (success) {
+    combo += 1;
+
+    if (combo > bestCombo) {
+      bestCombo = combo;
+    }
+
+    tap.className = 'success';
+    tap.textContent = '1 SECOND!';
+    result.textContent =
+      '🟢 Zo‘r! 1 sekundga juda yaqin.';
+  } else {
+    combo = 0;
+
+    tap.className = 'fail';
+    tap.textContent = 'RETRY';
+
+    const difference =
+      Math.abs(elapsed - 1);
+
+    result.textContent =
+      '🔴 Miss! Farq: ' +
+      difference.toFixed(3) +
+      ' s';
+  }
+
+  const score =
+    Math.abs(elapsed - 1);
+
+  if (best === null || score < best) {
+    best = score;
+  }
+
+  const player = getPlayerName();
+
+  if (!playerRecords[player]) {
+    playerRecords[player] = {
+      attempts: 0,
+      successes: 0,
+      best: 999,
+      bestCombo: 0
+    };
+  }
+
+  const record =
+    playerRecords[player];
+
+  record.attempts += 1;
+
+  if (success) {
+    record.successes += 1;
+  }
+
+  if (score < record.best) {
+    record.best = score;
+  }
+
+  if (combo > (record.bestCombo || 0)) {
+    record.bestCombo = combo;
+  }
+
+  renderAll();
+  saveGame();
+
+  sendGameToBackend(elapsed, combo);
+}
+
+/* =========================================================
+   MAIN BUTTON
+========================================================= */
+
+function action() {
+  if (running) {
+    stopGame();
+    return;
+  }
+
+  if (
+    tap.classList.contains('success') ||
+    tap.classList.contains('fail')
+  ) {
+    resetVisual();
+  }
+
+  startGame();
+}
+
+tap.addEventListener(
+  'click',
+  function(event) {
+    event.preventDefault();
+    action();
+  }
+);
+
+/* =========================================================
+   SPACE KEY
+========================================================= */
+
+document.addEventListener(
+  'keydown',
+  function(event) {
+    if (event.code !== 'Space') {
       return;
-
     }
 
-    let name = '';
-
-    if (user.username) {
-
-      name =
-        '@' + user.username;
-
-    } else {
-
-      name =
-        [
-          user.first_name,
-          user.last_name
-        ]
-        .filter(Boolean)
-        .join(' ');
-
-    }
-
-    if (name) {
-
-      document.getElementById(
-        'player'
-      ).textContent =
-        'PLAYER: ' + name;
-
-      console.log(
-        'Player:',
-        name
-      );
-
-    }
-
-  } catch (e) {
-
-    console.error(
-      'Player load xatosi:',
-      e
-    );
-
-  }
-
-}
-
-
-function getPlayerName() {
-
-  try {
-
-    const user =
-      getTelegramUser();
-
-    if (user) {
-
-      if (user.username) {
-
-        return '@' + user.username;
-
-      }
-
-      const fullName =
-        [
-          user.first_name,
-          user.last_name
-        ]
-        .filter(Boolean)
-        .join(' ');
-
-      if (fullName) {
-
-        return fullName;
-
-      }
-
-    }
-
-  } catch (e) {
-
-    console.error(
-      'Player name xatosi:',
-      e
-    );
-
-  }
-
-  return 'Guest';
-
-}
-
-
-/* =========================================================
-   TELEGRAM INIT DATA
-========================================================= */
-
-function getTelegramInitData() {
-
-  try {
+    const tag =
+      event.target &&
+      event.target.tagName
+        ? event.target.tagName
+        : '';
 
     if (
-      !window.Telegram ||
-      !window.Telegram.WebApp
+      tag === 'INPUT' ||
+      tag === 'TEXTAREA' ||
+      tag === 'SELECT'
     ) {
-
-      console.log(
-        'Telegram WebApp mavjud emas'
-      );
-
-      return '';
-
+      return;
     }
 
-    const tg =
-      window.Telegram.WebApp;
-
-    console.log(
-      'Telegram WebApp:',
-      tg
-    );
-
-    console.log(
-      'initData:',
-      tg.initData
-    );
-
-    const initData =
-      tg.initData || '';
-
-    return initData;
-
-  } catch (e) {
-
-    console.error(
-      'initData olish xatosi:',
-      e
-    );
-
-    return '';
-
+    event.preventDefault();
+    action();
   }
-
-}
-
+);
 
 /* =========================================================
-   SEND GAME TO SERVER
+   SEND RESULT TO SUPABASE
 ========================================================= */
 
 async function sendGameToBackend(
   elapsed,
   comboValue
 ) {
-
   const initData =
     getTelegramInitData();
 
-
-  /*
-    Telegram ichida ochilgan bo‘lsa,
-    initData bo‘lishi kerak.
-  */
-
   if (!initData) {
-
-    result.textContent =
-      'SERVER: TELEGRAM DATA MISSING';
+    setServerStatus(
+      'SERVER: TELEGRAM DATA MISSING'
+    );
 
     console.log(
       'Telegram initData mavjud emas'
     );
 
     return;
-
   }
 
+  setServerStatus(
+    'SERVER: SAVING...'
+  );
 
   try {
-
-    console.log(
-      'Serverga yuborilmoqda...'
-    );
-
-    console.log(
-      'Elapsed:',
-      elapsed
-    );
-
-    console.log(
-      'Combo:',
-      comboValue
-    );
-
-
     const response =
       await fetch(
         GAME_API_URL,
         {
           method: 'POST',
-
           headers: {
             'Content-Type':
               'application/json'
           },
-
           body:
             JSON.stringify({
-
-              action:
-                'save_game',
-
-              initData:
-                initData,
-
-              elapsed:
-                elapsed,
-
-              combo:
-                comboValue
-
+              action: 'save_game',
+              initData: initData,
+              elapsed: elapsed,
+              combo: comboValue
             })
-
-          }
         }
       );
-
 
     const bodyText =
       await response.text();
 
+    let data = null;
+
+    try {
+      data =
+        bodyText
+          ? JSON.parse(bodyText)
+          : null;
+    } catch (parseError) {
+      data = null;
+    }
 
     console.log(
       'SERVER STATUS:',
@@ -995,824 +1036,84 @@ async function sendGameToBackend(
       bodyText
     );
 
-
-    let data = null;
-
-
-    try {
-
-      data =
-        JSON.parse(
-          bodyText
-        );
-
-    } catch (e) {
-
-      data = null;
-
-    }
-
-
     if (response.ok) {
-
-      result.textContent =
-        'SERVER: SAVED ✓';
-
-      console.log(
-        'Game serverga saqlandi'
+      setServerStatus(
+        'SERVER: SAVED ✓'
       );
 
-    } else {
-
-      const reason =
-        data &&
-        data.error
-          ? data.error
-          : (
-              bodyText
-                ? bodyText.substring(
-                    0,
-                    100
-                  )
-                : 'NO_RESPONSE_BODY'
-            );
-
-
-      result.textContent =
-        'SERVER: ERROR ' +
-        response.status +
-        ' · ' +
-        reason;
-
-
-      console.error(
-        'Server xatosi:',
-        response.status,
-        reason
-      );
-
+      return;
     }
 
-  } catch (e) {
+    const reason =
+      data && data.error
+        ? data.error
+        : bodyText
+          ? bodyText.substring(0, 100)
+          : 'NO_RESPONSE_BODY';
+
+    setServerStatus(
+      'SERVER: ERROR ' +
+      response.status +
+      ' · ' +
+      reason
+    );
 
     console.error(
-      'BACKEND CONNECTION ERROR:',
-      e
+      'Server xatosi:',
+      response.status,
+      reason
+    );
+  } catch (error) {
+    console.error(
+      'Backend connection error:',
+      error
     );
 
-    result.textContent =
-      'SERVER: CONNECTION ERROR';
-
-  }
-
-}
-
-
-/* =========================================================
-   TIMER DISPLAY
-========================================================= */
-
-function display(time) {
-
-  if (!Number.isFinite(time)) {
-
-    time = 0;
-
-  }
-
-  timer.textContent =
-    time.toFixed(3);
-
-}
-
-
-/* =========================================================
-   HISTORY
-========================================================= */
-
-function renderHistory() {
-
-  const box =
-    document.getElementById(
-      'history'
+    setServerStatus(
+      'SERVER: CONNECTION ERROR'
     );
-
-
-  if (!history.length) {
-
-    box.innerHTML =
-      '<div class="history-empty">' +
-      'Hali urinishlar yo‘q' +
-      '</div>';
-
-    return;
-
   }
-
-
-  box.innerHTML =
-    history
-      .map(
-        (item, i) => {
-
-          const time =
-            Number(item.time) || 0;
-
-          const success =
-            Boolean(item.success);
-
-
-          return (
-
-            '<div class="history-row">' +
-
-              '<span>#' +
-                (history.length - i) +
-                ' -</span>' +
-
-              '<b class="' +
-                (success
-                  ? 'ok'
-                  : 'bad') +
-              '">' +
-
-                time.toFixed(3) +
-
-              '</b>' +
-
-              '<span style="margin-left:10px">' +
-
-                'sekund ' +
-
-                (
-                  success
-                    ? '🟢'
-                    : '🔴'
-                ) +
-
-              '</span>' +
-
-            '</div>'
-
-          );
-
-        }
-      )
-      .join('');
-
 }
 
-
 /* =========================================================
-   LEADERBOARD
+   ERROR DIAGNOSTICS
 ========================================================= */
 
-function renderLeaderboard() {
-
-  const box =
-    document.getElementById(
-      'leaderboard'
+window.addEventListener(
+  'error',
+  function(event) {
+    console.error(
+      'JavaScript error:',
+      event.error || event.message
     );
-
-
-  const rows =
-    Object.entries(
-      playerRecords
-    )
-    .sort(
-      (a, b) => {
-
-        const aSuccess =
-          Number(a[1].successes) || 0;
-
-        const bSuccess =
-          Number(b[1].successes) || 0;
-
-
-        if (
-          bSuccess !==
-          aSuccess
-        ) {
-
-          return (
-            bSuccess -
-            aSuccess
-          );
-
-        }
-
-
-        const aBest =
-          Number(a[1].best);
-
-        const bBest =
-          Number(b[1].best);
-
-
-        return (
-          (Number.isFinite(aBest)
-            ? aBest
-            : 999) -
-          (Number.isFinite(bBest)
-            ? bBest
-            : 999)
-        );
-
-      }
-    )
-    .slice(0, 10);
-
-
-  if (!rows.length) {
-
-    box.innerHTML =
-      '<div class="history-empty">' +
-      'Hali rekordlar yo‘q' +
-      '</div>';
-
-    renderAdmin();
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    rows
-      .map(
-        (entry, i) => {
-
-          const successes =
-            Number(
-              entry[1].successes
-            ) || 0;
-
-          const bestScore =
-            Number(
-              entry[1].best
-            );
-
-          const safeBest =
-            Number.isFinite(
-              bestScore
-            )
-              ? bestScore
-              : 0;
-
-
-          return (
-
-            '<div class="leader-row">' +
-
-              '<span>#' +
-                (i + 1) +
-                ' ' +
-                entry[0] +
-              '</span>' +
-
-              '<b>' +
-                successes +
-                ' ta · ' +
-                safeBest.toFixed(3) +
-                's' +
-              '</b>' +
-
-            '</div>'
-
-          );
-
-        }
-      )
-      .join('');
-
-
-  renderAdmin();
-
-}
-
-
-/* =========================================================
-   ADMIN LOCAL STATS
-========================================================= */
-
-function renderAdmin() {
-
-  const users =
-    Object.keys(
-      playerRecords
-    ).length;
-
-
-  const games =
-    Object.values(
-      playerRecords
-    )
-    .reduce(
-      (sum, p) => {
-
-        return (
-          sum +
-          (
-            Number(p.attempts) ||
-            0
-          )
-        );
-
-      },
-      0
-    );
-
-
-  const success =
-    Object.values(
-      playerRecords
-    )
-    .reduce(
-      (sum, p) => {
-
-        return (
-          sum +
-          (
-            Number(p.successes) ||
-            0
-          )
-        );
-
-      },
-      0
-    );
-
-
-  document.getElementById(
-    'adminUsers'
-  ).textContent =
-    users;
-
-
-  document.getElementById(
-    'adminGames'
-  ).textContent =
-    games;
-
-
-  document.getElementById(
-    'adminSuccess'
-  ).textContent =
-    success;
-
-
-  document.getElementById(
-    'adminBestCombo'
-  ).textContent =
-    bestCombo;
-
-}
-
-
-/* =========================================================
-   RESET VISUAL
-========================================================= */
-
-function resetVisual() {
-
-  tap.className = '';
-
-  tap.textContent =
-    'START';
-
-  result.textContent =
-    '1.000 sekundni ushla';
-
-}
-
-
-/* =========================================================
-   TIMER LOOP
-========================================================= */
-
-function tick() {
-
-  if (!running) {
-
-    return;
-
-  }
-
-
-  const elapsed =
-    (
-      performance.now() -
-      startTime
-    ) / 1000;
-
-
-  display(elapsed);
-
-
-  raf =
-    requestAnimationFrame(
-      tick
-    );
-
-}
-
-
-/* =========================================================
-   START
-========================================================= */
-
-function start() {
-
-  running = true;
-
-  startTime =
-    performance.now();
-
-
-  tap.className =
-    'running';
-
-  tap.textContent =
-    'STOP';
-
-  result.textContent =
-    '...';
-
-
-  cancelAnimationFrame(
-    raf
-  );
-
-
-  raf =
-    requestAnimationFrame(
-      tick
-    );
-
-}
-
-
-/* =========================================================
-   STOP
-========================================================= */
-
-function stop() {
-
-  running = false;
-
-
-  cancelAnimationFrame(
-    raf
-  );
-
-
-  const elapsed =
-    (
-      performance.now() -
-      startTime
-    ) / 1000;
-
-
-  display(elapsed);
-
-
-  attempts++;
-
-
-  attemptsEl.textContent =
-    attempts;
-
-
-  /*
-    SUCCESS:
-    0.990 <= elapsed <= 1.010
-  */
-
-  const success =
-    elapsed >= MIN_SUCCESS_TIME &&
-    elapsed <= MAX_SUCCESS_TIME;
-
-
-  history.unshift({
-
-    time:
-      elapsed,
-
-    success:
-      success
-
-  });
-
-
-  if (
-    history.length >
-    50
-  ) {
-
-    history.pop();
-
-  }
-
-
-  renderHistory();
-
-
-  /* =====================================================
-     SUCCESS
-  ===================================================== */
-
-  if (success) {
-
-    combo++;
-
-
-    if (
-      combo >
-      bestCombo
-    ) {
-
-      bestCombo =
-        combo;
-
-    }
-
-
-    comboEl.textContent =
-      combo;
-
-    bestComboEl.textContent =
-      bestCombo;
-
-
-    tap.className =
-      'success';
-
-    tap.textContent =
-      '1 SECOND!';
-
-
-    result.textContent =
-      '🟢 Zo‘r! 1 sekundga juda yaqin.';
-
-  }
-
-
-  /* =====================================================
-     FAIL
-  ===================================================== */
-
-  else {
-
-    combo = 0;
-
-
-    comboEl.textContent =
-      combo;
-
-
-    tap.className =
-      'fail';
-
-    tap.textContent =
-      'RETRY';
-
-
-    const diff =
-      Math.abs(
-        elapsed - 1
-      );
-
-
-    result.textContent =
-      '🔴 Miss! Farq: ' +
-      diff.toFixed(3) +
-      ' s';
-
-  }
-
-
-  /* =====================================================
-     BEST SCORE
-  ===================================================== */
-
-  const score =
-    Math.abs(
-      elapsed - 1
-    );
-
-
-  if (
-    best === null ||
-    score < best
-  ) {
-
-    best =
-      score;
-
-
-    bestEl.textContent =
-      score.toFixed(3) +
-      's';
-
-  }
-
-
-  /* =====================================================
-     PLAYER RECORD
-  ===================================================== */
-
-  const player =
-    getPlayerName();
-
-
-  if (
-    !playerRecords[player]
-  ) {
-
-    playerRecords[player] = {
-
-      successes: 0,
-
-      attempts: 0,
-
-      best: 999,
-
-      bestCombo: 0
-
-    };
-
-  }
-
-
-  playerRecords[player].attempts++;
-
-
-  if (success) {
-
-    playerRecords[player].successes++;
-
-  }
-
-
-  if (
-    score <
-    playerRecords[player].best
-  ) {
-
-    playerRecords[player].best =
-      score;
-
-  }
-
-
-  if (
-    combo >
-    (
-      playerRecords[player].bestCombo ||
-      0
-    )
-  ) {
-
-    playerRecords[player].bestCombo =
-      combo;
-
-  }
-
-
-  renderLeaderboard();
-
-
-  saveGame();
-
-
-  /*
-    MUHIM:
-    Serverga ham yuboramiz.
-  */
-
-  sendGameToBackend(
-    elapsed,
-    combo
-  );
-
-}
-
-
-/* =========================================================
-   MAIN ACTION
-========================================================= */
-
-function action() {
-
-  if (!running) {
-
-    if (
-      tap.classList.contains(
-        'success'
-      ) ||
-      tap.classList.contains(
-        'fail'
-      )
-    ) {
-
-      resetVisual();
-
-    }
-
-
-    start();
-
-  } else {
-
-    stop();
-
-  }
-
-}
-
-
-/* =========================================================
-   BUTTON CLICK
-========================================================= */
-
-tap.addEventListener(
-  'click',
-  action
-);
-
-
-/* =========================================================
-   SPACE KEY
-========================================================= */
-
-document.addEventListener(
-  'keydown',
-  function(e) {
-
-    if (
-      e.code === 'Space'
-    ) {
-
-      /*
-        Input/select kabi elementlarda
-        keraksiz ishlamasligi uchun.
-      */
-
-      const tag =
-        e.target &&
-        e.target.tagName
-          ? e.target.tagName
-          : '';
-
-
-      if (
-        tag === 'INPUT' ||
-        tag === 'TEXTAREA' ||
-        tag === 'SELECT'
-      ) {
-
-        return;
-
-      }
-
-
-      e.preventDefault();
-
-      action();
-
-    }
-
   }
 );
 
+window.addEventListener(
+  'unhandledrejection',
+  function(event) {
+    console.error(
+      'Unhandled promise rejection:',
+      event.reason
+    );
+  }
+);
 
 /* =========================================================
-   INITIAL LOAD
+   INITIALIZE
 ========================================================= */
 
+initTelegram();
 loadTelegramPlayer();
-
 loadGame();
-
-
-/*
-  Telegram ba'zan user/initData ni
-  WebView ishga tushgandan keyin beradi.
-  Shuning uchun yana bir marta tekshiramiz.
-*/
 
 setTimeout(
   function() {
-
     initTelegram();
-
     loadTelegramPlayer();
-
   },
   300
 );
-
 </script>
-
 </body>
 </html>
