@@ -1,0 +1,200 @@
+<!doctype html>
+
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>1 SECOND</title>
+<style>
+:root { color-scheme: dark light; }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; font-family: Arial, sans-serif; }
+#app { min-height: 100vh; width: 100%; display:flex; align-items:center; justify-content:center; background-color:#fff; color:#111; padding:24px; }
+.game { width:min(430px,100%); text-align:center; }
+h1 { margin:0 0 8px; font-size:42px; letter-spacing:7px; font-weight:800; }
+.sub { opacity:.55; font-size:12px; letter-spacing:3px; margin-bottom:30px; }
+.label { font-size:11px; letter-spacing:3px; opacity:.55; margin-bottom:8px; }
+.timer { font-variant-numeric:tabular-nums; font-size:48px; font-weight:700; letter-spacing:2px; margin-bottom:22px; }
+#tap { width:235px; height:235px; border-radius:50%; border:3px solid #e5c84b; background:#f2d66b; color:#191919; box-shadow:0 14px 45px rgba(0,0,0,.22); font-size:20px; font-weight:800; letter-spacing:3px; cursor:pointer; touch-action:manipulation; }
+#tap.running { background:#222; border-color:#666; color:#fff; }
+#tap.success { background:#24b35b; border-color:#55d982; color:#fff; }
+#tap.fail { background:#df3e45; border-color:#ff7479; color:#fff; }
+.result { min-height:25px; margin-top:18px; font-size:14px; font-weight:700; }
+.history-panel { margin-top:25px; }
+.history-title { font-size:11px; letter-spacing:3px; opacity:.55; margin-bottom:10px; }
+.history-list { max-height:180px; overflow-y:auto; }
+.history-row { display:flex; justify-content:center; align-items:center; margin:6px 0; font-size:13px; }
+.history-row b.ok { color:#24b35b; }
+.history-row b.bad { color:#df3e45; }
+.history-empty { font-size:12px; opacity:.4; }
+.stats { display:flex; justify-content:center; gap:42px; margin-top:25px; opacity:.75; }
+.stat b { display:block; font-size:20px; margin-bottom:3px; }
+.stat span { font-size:9px; letter-spacing:2px; }
+.hint { margin-top:24px; font-size:11px; opacity:.45; }
+.author { margin-top:18px; font-size:9px; letter-spacing:3px; opacity:.35; }
+</style>
+</head>
+<body>
+<div id="app">
+<main class="game">
+<h1>1 SECOND</h1>
+<div class="sub">CAN YOU STOP AT ONE?</div>
+<div id="player" style="font-size:13px;font-weight:700;margin-bottom:18px;opacity:.7">PLAYER: Guest</div>
+<div class="label">TIME</div>
+<div class="timer" id="timer">0.000</div>
+<button id="tap">START</button>
+<div class="result" id="result">1.000 sekundni ushla</div>
+<div class="history-panel">
+<div class="history-title">HISTORY</div>
+<div id="history" class="history-list"><div class="history-empty">Hali urinishlar yo‘q</div></div>
+</div>
+<div class="stats">
+<div class="stat"><b id="best">—</b><span>BEST</span></div>
+<div class="stat"><b id="attempts">0</b><span>ATTEMPTS</span></div>
+<div class="stat"><b id="combo">0</b><span>COMBO</span></div>
+<div class="stat"><b id="bestCombo">0</b><span>BEST COMBO</span></div>
+</div>
+<div class="hint">Telefon: TAP · Kompyuter: CLICK / SPACE</div>
+<div class="author">by S R B</div>
+</main>
+</div>
+
+<script>
+if (window.Telegram && window.Telegram.WebApp) {
+window.Telegram.WebApp.ready();
+window.Telegram.WebApp.expand();
+}
+
+const tap=document.getElementById('tap');
+const timer=document.getElementById('timer');
+const result=document.getElementById('result');
+const bestEl=document.getElementById('best');
+const attemptsEl=document.getElementById('attempts');
+const TOLERANCE=.010;
+
+let running=false,startTime=0,raf=0,best=null,attempts=0,history=[],combo=0,bestCombo=0;
+
+function saveGame(){
+localStorage.setItem('oneSecondGame',JSON.stringify({best,attempts,history,combo,bestCombo}));
+}
+
+function loadGame(){
+try{
+const saved=JSON.parse(localStorage.getItem('oneSecondGame'));
+if(!saved)return;
+best=saved.best??null;
+attempts=saved.attempts??0;
+history=Array.isArray(saved.history)?saved.history:[];
+combo=saved.combo??0;
+bestCombo=saved.bestCombo??0;
+if(best!==null)bestEl.textContent=best.toFixed(3)+'s';
+attemptsEl.textContent=attempts;
+document.getElementById('combo').textContent=combo;
+document.getElementById('bestCombo').textContent=bestCombo;
+renderHistory();
+}catch(e){}
+}
+
+function loadTelegramPlayer(){
+try{
+const user=window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initDataUnsafe&&window.Telegram.WebApp.initDataUnsafe.user;
+if(!user)return;
+const name=user.username?'@'+user.username:[user.first_name,user.last_name].filter(Boolean).join(' ');
+if(name)document.getElementById('player').textContent='PLAYER: '+name;
+}catch(e){}
+}
+
+function display(t){timer.textContent=t.toFixed(3);}
+
+function renderHistory(){
+const box=document.getElementById('history');
+box.innerHTML=history.length?history.map((item,i)=>
+'<div class="history-row"><span>#'+(history.length-i)+' -</span><b class="'+(item.success?'ok':'bad')+'">'+item.time.toFixed(3)+'</b><span style="margin-left:10px">sekund '+(item.success?'🟢':'🔴')+'</span></div>'
+).join(''):'<div class="history-empty">Hali urinishlar yo‘q</div>';
+}
+
+function resetVisual(){
+tap.className='';
+tap.textContent='START';
+result.textContent='1.000 sekundni ushla';
+}
+
+function tick(){
+if(!running)return;
+display((performance.now()-startTime)/1000);
+raf=requestAnimationFrame(tick);
+}
+
+function start(){
+running=true;
+startTime=performance.now();
+tap.className='running';
+tap.textContent='STOP';
+result.textContent='...';
+cancelAnimationFrame(raf);
+raf=requestAnimationFrame(tick);
+}
+
+function stop(){
+running=false;
+cancelAnimationFrame(raf);
+
+const elapsed=(performance.now()-startTime)/1000;
+display(elapsed);
+attempts++;
+attemptsEl.textContent=attempts;
+
+const success=elapsed>=.990&&elapsed<=1.010;
+
+history.unshift({time:elapsed,success});
+if(history.length>50)history.pop();
+renderHistory();
+
+if(success){
+combo++;
+if(combo>bestCombo)bestCombo=combo;
+document.getElementById('combo').textContent=combo;
+document.getElementById('bestCombo').textContent=bestCombo;
+tap.className='success';
+tap.textContent='1 SECOND!';
+result.textContent='🟢 Zo‘r! 1 sekundga juda yaqin.';
+}else{
+combo=0;
+document.getElementById('combo').textContent=combo;
+tap.className='fail';
+tap.textContent='RETRY';
+const diff=Math.abs(elapsed-1);
+result.textContent='🔴 Miss! Farq: '+diff.toFixed(3)+' s';
+}
+
+const score=Math.abs(elapsed-1);
+if(best===null||score<best){
+best=score;
+bestEl.textContent=score.toFixed(3)+'s';
+}
+
+saveGame();
+}
+
+function action(){
+if(!running){
+if(tap.classList.contains('success')||tap.classList.contains('fail'))resetVisual();
+start();
+}else stop();
+}
+
+tap.addEventListener('click',action);
+
+document.addEventListener('keydown',e=>{
+if(e.code==='Space'){
+e.preventDefault();
+action();
+}
+});
+
+loadGame();
+loadTelegramPlayer();
+</script>
+
+</body>
+</html>
