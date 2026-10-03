@@ -1,12 +1,9 @@
-```html
 <!doctype html>
 <html lang="uz">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>1 SECOND</title>
-
-<!-- Telegram Mini App SDK -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
@@ -118,47 +115,10 @@ h1 {
   font-weight: 700;
 }
 
-.history-panel {
-  margin-top: 28px;
-}
-
-.history-title {
-  font-size: 10px;
-  letter-spacing: 3px;
-  opacity: .5;
-  margin-bottom: 10px;
-}
-
-.history-list {
-  max-height: 180px;
-  overflow-y: auto;
-}
-
-.history-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 12px;
-  margin: 5px 0;
-}
-
-.history-row b.ok {
-  color: #24a653;
-}
-
-.history-row b.bad {
-  color: #d9363e;
-}
-
-.history-empty {
-  font-size: 11px;
-  opacity: .4;
-}
-
 .stats {
   display: flex;
   justify-content: center;
-  gap: 28px;
+  gap: 42px;
   margin-top: 25px;
   opacity: .75;
   flex-wrap: wrap;
@@ -187,13 +147,130 @@ h1 {
   letter-spacing: 3px;
   opacity: .35;
 }
+
+.history-panel {
+  margin-top: 28px;
+  text-align: left;
+}
+
+.history-title {
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 3px;
+  opacity: .5;
+  margin-bottom: 10px;
+}
+
+.history-row {
+  display: flex;
+  align-items: center;
+  padding: 7px 12px;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  font-size: 12px;
+}
+
+.history-row b {
+  margin-left: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-row .ok {
+  color: #24b35b;
+}
+
+.history-row .bad {
+  color: #df3e45;
+}
+
+.history-empty {
+  text-align: center;
+  padding: 10px;
+  font-size: 11px;
+  opacity: .45;
+}
+
+.leaderboard {
+  margin-top: 30px;
+  text-align: left;
+}
+
+.leaderboard-title {
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 3px;
+  opacity: .5;
+  margin-bottom: 10px;
+}
+
+.leader-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  font-size: 12px;
+  gap: 10px;
+}
+
+.leader-row b {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.admin-panel {
+  margin-top: 30px;
+  padding: 18px;
+  border: 1px solid rgba(0,0,0,.1);
+  border-radius: 16px;
+  background: #fafafa;
+  text-align: left;
+}
+
+.admin-title {
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 3px;
+  opacity: .6;
+  margin-bottom: 16px;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 10px;
+}
+
+.admin-card {
+  padding: 12px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.07);
+}
+
+.admin-card b {
+  display: block;
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.admin-card span {
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  opacity: .5;
+}
+
+.admin-note {
+  margin-top: 12px;
+  font-size: 9px;
+  line-height: 1.5;
+  opacity: .5;
+  text-align: center;
+}
 </style>
 </head>
 
 <body>
 
 <div id="app">
-
   <main class="game">
 
     <h1>1 SECOND</h1>
@@ -263,6 +340,57 @@ h1 {
 
     </div>
 
+    <div class="leaderboard">
+
+      <div class="leaderboard-title">
+        PLAYER RECORDS
+      </div>
+
+      <div id="leaderboard">
+        <div class="history-empty">
+          Hali rekordlar yo‘q
+        </div>
+      </div>
+
+    </div>
+
+    <div class="admin-panel">
+
+      <div class="admin-title">
+        ADMIN PANEL · LOCAL PREVIEW
+      </div>
+
+      <div class="admin-grid">
+
+        <div class="admin-card">
+          <b id="adminUsers">0</b>
+          <span>PLAYERS</span>
+        </div>
+
+        <div class="admin-card">
+          <b id="adminGames">0</b>
+          <span>GAMES</span>
+        </div>
+
+        <div class="admin-card">
+          <b id="adminSuccess">0</b>
+          <span>SUCCESSFUL</span>
+        </div>
+
+        <div class="admin-card">
+          <b id="adminBestCombo">0</b>
+          <span>BEST COMBO</span>
+        </div>
+
+      </div>
+
+      <div class="admin-note">
+        Hozircha preview rejimi: statistika shu qurilmadagi ma’lumotlardan olinadi.
+        Global foydalanuvchilar uchun server + database keyingi bosqichda ulanadi.
+      </div>
+
+    </div>
+
     <div class="hint">
       Telefon: TAP · Kompyuter: CLICK / SPACE
     </div>
@@ -272,56 +400,52 @@ h1 {
     </div>
 
   </main>
-
 </div>
 
 <script>
 
-/* =========================
-   TELEGRAM MINI APP
-========================= */
+const SUPABASE_URL =
+  'https://pqqroisbizxagbuwmldi.supabase.co';
 
-if (window.Telegram && window.Telegram.WebApp) {
+const GAME_API_URL =
+  SUPABASE_URL + '/functions/v1/game-api';
 
+
+/* TELEGRAM */
+
+if (
+  window.Telegram &&
+  window.Telegram.WebApp
+) {
   window.Telegram.WebApp.ready();
-
   window.Telegram.WebApp.expand();
-
 }
 
 
-/* =========================
-   ELEMENTS
-========================= */
+/* ELEMENTS */
 
-const tap = document.getElementById('tap');
+const tap =
+  document.getElementById('tap');
 
-const timer = document.getElementById('timer');
+const timer =
+  document.getElementById('timer');
 
-const result = document.getElementById('result');
+const result =
+  document.getElementById('result');
 
-const bestEl = document.getElementById('best');
+const bestEl =
+  document.getElementById('best');
 
-const attemptsEl = document.getElementById('attempts');
-
-const comboEl = document.getElementById('combo');
-
-const bestComboEl = document.getElementById('bestCombo');
+const attemptsEl =
+  document.getElementById('attempts');
 
 
-/* =========================
-   SETTINGS
-========================= */
+/* GAME SETTINGS */
 
 const TOLERANCE = 0.010;
 
-// SUCCESS RANGE:
-// 0.990 - 1.010 seconds
 
-
-/* =========================
-   GAME VARIABLES
-========================= */
+/* GAME VARIABLES */
 
 let running = false;
 
@@ -339,15 +463,16 @@ let combo = 0;
 
 let bestCombo = 0;
 
+let playerRecords = {};
 
-/* =========================
-   SAVE GAME
-========================= */
+
+/* LOCAL SAVE */
 
 function saveGame() {
 
   localStorage.setItem(
     'oneSecondGame',
+
     JSON.stringify({
 
       best: best,
@@ -358,17 +483,16 @@ function saveGame() {
 
       combo: combo,
 
-      bestCombo: bestCombo
+      bestCombo: bestCombo,
+
+      playerRecords: playerRecords
 
     })
   );
-
 }
 
 
-/* =========================
-   LOAD GAME
-========================= */
+/* LOCAL LOAD */
 
 function loadGame() {
 
@@ -376,25 +500,35 @@ function loadGame() {
 
     const saved =
       JSON.parse(
-        localStorage.getItem('oneSecondGame')
+        localStorage.getItem(
+          'oneSecondGame'
+        )
       );
 
     if (!saved) return;
 
+    best =
+      saved.best ?? null;
 
-    best = saved.best ?? null;
-
-    attempts = saved.attempts ?? 0;
+    attempts =
+      saved.attempts ?? 0;
 
     history =
       Array.isArray(saved.history)
         ? saved.history
         : [];
 
-    combo = saved.combo ?? 0;
+    combo =
+      saved.combo ?? 0;
 
-    bestCombo = saved.bestCombo ?? 0;
+    bestCombo =
+      saved.bestCombo ?? 0;
 
+    playerRecords =
+      saved.playerRecords &&
+      typeof saved.playerRecords === 'object'
+        ? saved.playerRecords
+        : {};
 
     if (best !== null) {
 
@@ -403,29 +537,34 @@ function loadGame() {
 
     }
 
-
     attemptsEl.textContent =
       attempts;
 
-    comboEl.textContent =
-      combo;
+    document.getElementById(
+      'combo'
+    ).textContent = combo;
 
-    bestComboEl.textContent =
-      bestCombo;
-
+    document.getElementById(
+      'bestCombo'
+    ).textContent = bestCombo;
 
     renderHistory();
 
-  }
+    renderLeaderboard();
 
-  catch (e) {}
+  } catch (e) {
+
+    console.log(
+      'Local data load error:',
+      e
+    );
+
+  }
 
 }
 
 
-/* =========================
-   TELEGRAM USERNAME
-========================= */
+/* TELEGRAM PLAYER */
 
 function loadTelegramPlayer() {
 
@@ -437,52 +576,172 @@ function loadTelegramPlayer() {
       window.Telegram.WebApp.initDataUnsafe &&
       window.Telegram.WebApp.initDataUnsafe.user;
 
-
     if (!user) return;
 
-
-    let name = '';
-
-
-    if (user.username) {
-
-      name = '@' + user.username;
-
-    }
-
-    else {
-
-      name =
-        [
-          user.first_name,
-          user.last_name
-        ]
-        .filter(Boolean)
-        .join(' ');
-
-    }
-
+    const name =
+      user.username
+        ? '@' + user.username
+        : [
+            user.first_name,
+            user.last_name
+          ]
+          .filter(Boolean)
+          .join(' ');
 
     if (name) {
 
-      document.getElementById('player').textContent =
+      document.getElementById(
+        'player'
+      ).textContent =
         'PLAYER: ' + name;
 
     }
 
+  } catch (e) {
+
+    console.log(
+      'Telegram player error:',
+      e
+    );
+
   }
 
-  catch (e) {}
-
 }
-
 
 loadTelegramPlayer();
 
 
-/* =========================
-   TIMER DISPLAY
-========================= */
+/* GET PLAYER NAME */
+
+function getPlayerName() {
+
+  try {
+
+    const user =
+      window.Telegram &&
+      window.Telegram.WebApp &&
+      window.Telegram.WebApp.initDataUnsafe &&
+      window.Telegram.WebApp.initDataUnsafe.user;
+
+    if (user) {
+
+      return user.username
+        ? '@' + user.username
+        : [
+            user.first_name,
+            user.last_name
+          ]
+          .filter(Boolean)
+          .join(' ');
+
+    }
+
+  } catch (e) {
+
+    console.log(
+      'Player name error:',
+      e
+    );
+
+  }
+
+  return 'Guest';
+
+}
+
+
+/* GET TELEGRAM INIT DATA */
+
+function getTelegramInitData() {
+
+  try {
+
+    return (
+      window.Telegram &&
+      window.Telegram.WebApp
+    )
+      ? window.Telegram.WebApp.initData || ''
+      : '';
+
+  } catch (e) {
+
+    return '';
+
+  }
+
+}
+
+
+/* SEND GAME TO SUPABASE */
+
+async function sendGameToBackend(
+  elapsed,
+  combo
+) {
+
+  const initData =
+    getTelegramInitData();
+
+  if (!initData) {
+
+    console.log(
+      'Telegram initData mavjud emas'
+    );
+
+    return;
+
+  }
+
+  try {
+
+    const response =
+      await fetch(
+        GAME_API_URL,
+        {
+
+          method: 'POST',
+
+          headers: {
+            'Content-Type':
+              'application/json'
+          },
+
+          body: JSON.stringify({
+
+            action: 'save_game',
+
+            initData: initData,
+
+            elapsed: elapsed,
+
+            combo: combo
+
+          })
+
+        }
+      );
+
+    const data =
+      await response.json();
+
+    console.log(
+      'Backend response:',
+      data
+    );
+
+  } catch (e) {
+
+    console.log(
+      'Backend ulanish xatosi:',
+      e
+    );
+
+  }
+
+}
+
+
+/* DISPLAY TIMER */
 
 function display(t) {
 
@@ -492,65 +751,207 @@ function display(t) {
 }
 
 
-/* =========================
-   HISTORY
-========================= */
+/* HISTORY */
 
 function renderHistory() {
 
   const box =
-    document.getElementById('history');
-
+    document.getElementById(
+      'history'
+    );
 
   box.innerHTML =
     history.length
 
-      ? history.map((item, i) =>
+      ? history.map(
+          (item, i) =>
 
-          '<div class="history-row">' +
+            '<div class="history-row">' +
 
-          '<span>#' +
-          (history.length - i) +
-          ' -</span>' +
+              '<span>#' +
+                (history.length - i) +
+                ' -</span>' +
 
-          '<b class="' +
-          (item.success ? 'ok' : 'bad') +
-          '">' +
+              '<b class="' +
+                (item.success
+                  ? 'ok'
+                  : 'bad') +
+                '">' +
 
-          item.time.toFixed(3) +
+                item.time.toFixed(3) +
 
-          '</b>' +
+              '</b>' +
 
-          '<span style="margin-left:10px">' +
+              '<span style="margin-left:10px">' +
 
-          'sekund ' +
+                'sekund ' +
 
-          (item.success ? '🟢' : '🔴') +
+                (
+                  item.success
+                    ? '🟢'
+                    : '🔴'
+                ) +
 
-          '</span>' +
+              '</span>' +
 
-          '</div>'
+            '</div>'
 
         ).join('')
 
-      :
-
-        '<div class="history-empty">' +
-        'Hali urinishlar yo‘q' +
+      : '<div class="history-empty">' +
+          'Hali urinishlar yo‘q' +
         '</div>';
 
 }
 
 
-/* =========================
-   RESET BUTTON
-========================= */
+/* PLAYER RECORDS */
+
+function renderLeaderboard() {
+
+  const box =
+    document.getElementById(
+      'leaderboard'
+    );
+
+  const rows =
+    Object.entries(
+      playerRecords
+    )
+    .sort(
+      (a, b) => {
+
+        if (
+          b[1].successes !==
+          a[1].successes
+        ) {
+
+          return (
+            b[1].successes -
+            a[1].successes
+          );
+
+        }
+
+        return (
+          a[1].best -
+          b[1].best
+        );
+
+      }
+    )
+    .slice(0, 10);
+
+
+  box.innerHTML =
+    rows.length
+
+      ? rows.map(
+          (entry, i) =>
+
+            '<div class="leader-row">' +
+
+              '<span>#' +
+                (i + 1) +
+                ' ' +
+                entry[0] +
+              '</span>' +
+
+              '<b>' +
+                entry[1].successes +
+                ' ta · ' +
+                entry[1].best.toFixed(3) +
+                's' +
+              '</b>' +
+
+            '</div>'
+
+        ).join('')
+
+      : '<div class="history-empty">' +
+          'Hali rekordlar yo‘q' +
+        '</div>';
+
+  renderAdmin();
+
+}
+
+
+/* ADMIN */
+
+function renderAdmin() {
+
+  const users =
+    Object.keys(
+      playerRecords
+    ).length;
+
+
+  const games =
+    Object.values(
+      playerRecords
+    )
+    .reduce(
+      (sum, p) =>
+        sum +
+        (
+          p.attempts ||
+          p.successes ||
+          0
+        ),
+      0
+    );
+
+
+  const success =
+    Object.values(
+      playerRecords
+    )
+    .reduce(
+      (sum, p) =>
+        sum +
+        (
+          p.successes ||
+          0
+        ),
+      0
+    );
+
+
+  document.getElementById(
+    'adminUsers'
+  ).textContent =
+    users;
+
+
+  document.getElementById(
+    'adminGames'
+  ).textContent =
+    games;
+
+
+  document.getElementById(
+    'adminSuccess'
+  ).textContent =
+    success;
+
+
+  document.getElementById(
+    'adminBestCombo'
+  ).textContent =
+    bestCombo;
+
+}
+
+
+/* RESET BUTTON */
 
 function resetVisual() {
 
   tap.className = '';
 
-  tap.textContent = 'START';
+  tap.textContent =
+    'START';
 
   result.textContent =
     '1.000 sekundni ushla';
@@ -558,29 +959,28 @@ function resetVisual() {
 }
 
 
-/* =========================
-   TIMER LOOP
-========================= */
+/* TIMER LOOP */
 
 function tick() {
 
   if (!running) return;
 
-
   display(
-    (performance.now() - startTime) / 1000
+    (
+      performance.now() -
+      startTime
+    ) / 1000
   );
 
-
   raf =
-    requestAnimationFrame(tick);
+    requestAnimationFrame(
+      tick
+    );
 
 }
 
 
-/* =========================
-   START
-========================= */
+/* START */
 
 function start() {
 
@@ -588,7 +988,6 @@ function start() {
 
   startTime =
     performance.now();
-
 
   tap.className =
     'running';
@@ -599,32 +998,39 @@ function start() {
   result.textContent =
     '...';
 
-
-  cancelAnimationFrame(raf);
+  cancelAnimationFrame(
+    raf
+  );
 
   raf =
-    requestAnimationFrame(tick);
+    requestAnimationFrame(
+      tick
+    );
 
 }
 
 
-/* =========================
-   STOP
-========================= */
+/* STOP */
 
 function stop() {
 
   running = false;
 
-
-  cancelAnimationFrame(raf);
+  cancelAnimationFrame(
+    raf
+  );
 
 
   const elapsed =
-    (performance.now() - startTime) / 1000;
+    (
+      performance.now() -
+      startTime
+    ) / 1000;
 
 
-  display(elapsed);
+  display(
+    elapsed
+  );
 
 
   attempts++;
@@ -633,7 +1039,11 @@ function stop() {
     attempts;
 
 
-  /* SUCCESS */
+  /*
+    SUCCESS:
+    0.990 dan
+    1.010 gacha
+  */
 
   const success =
     elapsed >= 0.990 &&
@@ -649,7 +1059,9 @@ function stop() {
   });
 
 
-  if (history.length > 50) {
+  if (
+    history.length > 50
+  ) {
 
     history.pop();
 
@@ -659,16 +1071,16 @@ function stop() {
   renderHistory();
 
 
-  /* =========================
-     COMBO
-  ========================= */
+  /* SUCCESS */
 
   if (success) {
 
     combo++;
 
 
-    if (combo > bestCombo) {
+    if (
+      combo > bestCombo
+    ) {
 
       bestCombo =
         combo;
@@ -676,10 +1088,15 @@ function stop() {
     }
 
 
-    comboEl.textContent =
+    document.getElementById(
+      'combo'
+    ).textContent =
       combo;
 
-    bestComboEl.textContent =
+
+    document.getElementById(
+      'bestCombo'
+    ).textContent =
       bestCombo;
 
 
@@ -693,15 +1110,19 @@ function stop() {
     result.textContent =
       '🟢 Zo‘r! 1 sekundga juda yaqin.';
 
+
   }
 
+  /* FAIL */
 
   else {
 
     combo = 0;
 
 
-    comboEl.textContent =
+    document.getElementById(
+      'combo'
+    ).textContent =
       combo;
 
 
@@ -713,7 +1134,9 @@ function stop() {
 
 
     const diff =
-      Math.abs(elapsed - 1);
+      Math.abs(
+        elapsed - 1
+      );
 
 
     result.textContent =
@@ -724,12 +1147,12 @@ function stop() {
   }
 
 
-  /* =========================
-     BEST SCORE
-  ========================= */
+  /* BEST */
 
   const score =
-    Math.abs(elapsed - 1);
+    Math.abs(
+      elapsed - 1
+    );
 
 
   if (
@@ -737,37 +1160,93 @@ function stop() {
     score < best
   ) {
 
-    best = score;
-
+    best =
+      score;
 
     bestEl.textContent =
-      score.toFixed(3) + 's';
+      score.toFixed(3) +
+      's';
 
   }
 
 
+  /* PLAYER RECORD */
+
+  const player =
+    getPlayerName();
+
+
+  if (
+    !playerRecords[player]
+  ) {
+
+    playerRecords[player] = {
+
+      successes: 0,
+
+      attempts: 0,
+
+      best: 999
+
+    };
+
+  }
+
+
+  playerRecords[player].attempts++;
+
+
+  if (success) {
+
+    playerRecords[player].successes++;
+
+  }
+
+
+  if (
+    score <
+    playerRecords[player].best
+  ) {
+
+    playerRecords[player].best =
+      score;
+
+  }
+
+
+  renderLeaderboard();
+
   saveGame();
+
+
+  /* SEND TO SUPABASE */
+
+  sendGameToBackend(
+    elapsed,
+    combo
+  );
 
 }
 
 
-/* =========================
-   BUTTON ACTION
-========================= */
+/* BUTTON ACTION */
 
 function action() {
 
   if (!running) {
 
     if (
-      tap.classList.contains('success') ||
-      tap.classList.contains('fail')
+      tap.classList.contains(
+        'success'
+      ) ||
+      tap.classList.contains(
+        'fail'
+      )
     ) {
 
       resetVisual();
 
     }
-
 
     start();
 
@@ -782,9 +1261,7 @@ function action() {
 }
 
 
-/* =========================
-   MOUSE / TOUCH
-========================= */
+/* CLICK */
 
 tap.addEventListener(
   'click',
@@ -792,15 +1269,15 @@ tap.addEventListener(
 );
 
 
-/* =========================
-   SPACE KEY
-========================= */
+/* SPACE */
 
 document.addEventListener(
   'keydown',
   e => {
 
-    if (e.code === 'Space') {
+    if (
+      e.code === 'Space'
+    ) {
 
       e.preventDefault();
 
@@ -812,9 +1289,7 @@ document.addEventListener(
 );
 
 
-/* =========================
-   LOAD
-========================= */
+/* INITIAL LOAD */
 
 loadGame();
 
@@ -822,4 +1297,3 @@ loadGame();
 
 </body>
 </html>
-```
