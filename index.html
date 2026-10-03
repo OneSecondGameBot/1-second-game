@@ -119,56 +119,10 @@ h1 {
   word-break: break-word;
 }
 
-.history-panel {
-  margin-top: 30px;
-  text-align: left;
-}
-
-.history-title {
-  text-align: center;
-  font-size: 10px;
-  letter-spacing: 3px;
-  opacity: .5;
-  margin-bottom: 10px;
-}
-
-.history-list {
-  max-height: 260px;
-  overflow-y: auto;
-}
-
-.history-row {
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
-  border-bottom: 1px solid rgba(0,0,0,.08);
-  font-size: 12px;
-}
-
-.history-row b {
-  margin-left: 5px;
-  font-variant-numeric: tabular-nums;
-}
-
-.history-row .ok {
-  color: #20a957;
-}
-
-.history-row .bad {
-  color: #d7353d;
-}
-
-.history-empty {
-  text-align: center;
-  font-size: 11px;
-  opacity: .45;
-  padding: 12px;
-}
-
 .stats {
   display: flex;
   justify-content: center;
-  gap: 25px;
+  gap: 42px;
   margin-top: 25px;
   opacity: .75;
   flex-wrap: wrap;
@@ -198,6 +152,52 @@ h1 {
   opacity: .35;
 }
 
+.history-panel {
+  margin-top: 28px;
+}
+
+.history-title {
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 3px;
+  opacity: .5;
+  margin-bottom: 10px;
+}
+
+.history-list {
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.history-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(0,0,0,.07);
+  font-size: 12px;
+}
+
+.history-row b {
+  margin-left: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-row .ok {
+  color: #159447;
+}
+
+.history-row .bad {
+  color: #d52f37;
+}
+
+.history-empty {
+  font-size: 11px;
+  opacity: .45;
+  padding: 10px;
+  text-align: center;
+}
+
 .leaderboard {
   margin-top: 30px;
   text-align: left;
@@ -217,10 +217,12 @@ h1 {
   padding: 8px 12px;
   border-bottom: 1px solid rgba(0,0,0,.08);
   font-size: 12px;
+  gap: 10px;
 }
 
 .leader-row b {
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .admin-panel {
@@ -272,6 +274,26 @@ h1 {
   opacity: .5;
   text-align: center;
 }
+
+@media (max-width: 420px) {
+  #app {
+    padding: 18px 12px;
+  }
+
+  h1 {
+    font-size: 34px;
+    letter-spacing: 5px;
+  }
+
+  #tap {
+    width: 205px;
+    height: 205px;
+  }
+
+  .stats {
+    gap: 22px;
+  }
+}
 </style>
 </head>
 
@@ -298,15 +320,25 @@ h1 {
       TIME
     </div>
 
-    <div class="timer" id="timer">
+    <div
+      class="timer"
+      id="timer"
+    >
       0.000
     </div>
 
-    <button id="tap" aria-label="Start and stop">
+    <button
+      id="tap"
+      aria-label="Start and stop"
+      type="button"
+    >
       START
     </button>
 
-    <div class="result" id="result">
+    <div
+      class="result"
+      id="result"
+    >
       1.000 sekundni ushla
     </div>
 
@@ -316,7 +348,10 @@ h1 {
         HISTORY
       </div>
 
-      <div id="history" class="history-list">
+      <div
+        id="history"
+        class="history-list"
+      >
         <div class="history-empty">
           Hali urinishlar yo‘q
         </div>
@@ -393,9 +428,8 @@ h1 {
       </div>
 
       <div class="admin-note">
-        Hozircha preview rejimi: statistika shu qurilmadagi
-        ma’lumotlardan olinadi. Global foydalanuvchilar uchun
-        server + database keyingi bosqichda ulanadi.
+        Hozircha preview rejimi: statistika shu qurilmadagi ma’lumotlardan olinadi.
+        Global foydalanuvchilar uchun server + database ulanadi.
       </div>
 
     </div>
@@ -414,6 +448,10 @@ h1 {
 
 <script>
 
+/* =========================================================
+   SUPABASE / BACKEND
+========================================================= */
+
 const SUPABASE_URL =
   'https://pqqroisbizxagbuwmldi.supabase.co';
 
@@ -421,18 +459,59 @@ const GAME_API_URL =
   SUPABASE_URL + '/functions/v1/game-api';
 
 
-/* TELEGRAM */
+/* =========================================================
+   TELEGRAM WEB APP
+========================================================= */
 
-if (window.Telegram && window.Telegram.WebApp) {
+function initTelegram() {
 
-  window.Telegram.WebApp.ready();
+  try {
 
-  window.Telegram.WebApp.expand();
+    if (
+      window.Telegram &&
+      window.Telegram.WebApp
+    ) {
+
+      const tg = window.Telegram.WebApp;
+
+      tg.ready();
+
+      tg.expand();
+
+      console.log(
+        'Telegram WebApp ishga tushdi'
+      );
+
+      console.log(
+        'Telegram initData:',
+        tg.initData
+      );
+
+    } else {
+
+      console.log(
+        'Telegram WebApp mavjud emas'
+      );
+
+    }
+
+  } catch (e) {
+
+    console.error(
+      'Telegram init xatosi:',
+      e
+    );
+
+  }
 
 }
 
+initTelegram();
 
-/* ELEMENTS */
+
+/* =========================================================
+   DOM
+========================================================= */
 
 const tap =
   document.getElementById('tap');
@@ -449,10 +528,40 @@ const bestEl =
 const attemptsEl =
   document.getElementById('attempts');
 
+const comboEl =
+  document.getElementById('combo');
 
-/* GAME SETTINGS */
+const bestComboEl =
+  document.getElementById('bestCombo');
+
+
+/* =========================================================
+   GAME SETTINGS
+========================================================= */
 
 const TOLERANCE = 0.010;
+
+/*
+  SUCCESS:
+  0.990
+  0.991
+  ...
+  1.000
+  ...
+  1.009
+  1.010
+*/
+
+const MIN_SUCCESS_TIME =
+  1.000 - TOLERANCE;
+
+const MAX_SUCCESS_TIME =
+  1.000 + TOLERANCE;
+
+
+/* =========================================================
+   GAME VARIABLES
+========================================================= */
 
 let running = false;
 
@@ -473,50 +582,72 @@ let bestCombo = 0;
 let playerRecords = {};
 
 
-/* LOCAL SAVE */
+/* =========================================================
+   LOCAL STORAGE
+========================================================= */
 
 function saveGame() {
 
-  localStorage.setItem(
-    'oneSecondGame',
-    JSON.stringify({
+  try {
 
-      best: best,
+    localStorage.setItem(
+      'oneSecondGame',
+      JSON.stringify({
 
-      attempts: attempts,
+        best: best,
 
-      history: history,
+        attempts: attempts,
 
-      combo: combo,
+        history: history,
 
-      bestCombo: bestCombo,
+        combo: combo,
 
-      playerRecords: playerRecords
+        bestCombo: bestCombo,
 
-    })
-  );
+        playerRecords: playerRecords
+
+      })
+    );
+
+  } catch (e) {
+
+    console.log(
+      'LocalStorage save xatosi:',
+      e
+    );
+
+  }
 
 }
 
-
-/* LOCAL LOAD */
 
 function loadGame() {
 
   try {
 
-    const saved =
-      JSON.parse(
-        localStorage.getItem('oneSecondGame')
+    const raw =
+      localStorage.getItem(
+        'oneSecondGame'
       );
 
-    if (!saved) return;
+    if (!raw) {
+      return;
+    }
+
+    const saved =
+      JSON.parse(raw);
+
+    if (!saved) {
+      return;
+    }
 
     best =
       saved.best ?? null;
 
     attempts =
-      saved.attempts ?? 0;
+      Number.isFinite(saved.attempts)
+        ? saved.attempts
+        : 0;
 
     history =
       Array.isArray(saved.history)
@@ -524,10 +655,14 @@ function loadGame() {
         : [];
 
     combo =
-      saved.combo ?? 0;
+      Number.isFinite(saved.combo)
+        ? saved.combo
+        : 0;
 
     bestCombo =
-      saved.bestCombo ?? 0;
+      Number.isFinite(saved.bestCombo)
+        ? saved.bestCombo
+        : 0;
 
     playerRecords =
       saved.playerRecords &&
@@ -539,32 +674,27 @@ function loadGame() {
     if (best !== null) {
 
       bestEl.textContent =
-        best.toFixed(3) + 's';
+        Number(best).toFixed(3) + 's';
 
     }
 
     attemptsEl.textContent =
       attempts;
 
-    document.getElementById(
-      'combo'
-    ).textContent = combo;
+    comboEl.textContent =
+      combo;
 
-    document.getElementById(
-      'bestCombo'
-    ).textContent = bestCombo;
-
+    bestComboEl.textContent =
+      bestCombo;
 
     renderHistory();
 
     renderLeaderboard();
 
-  }
-
-  catch (e) {
+  } catch (e) {
 
     console.log(
-      'Local load error:',
+      'LocalStorage load xatosi:',
       e
     );
 
@@ -573,31 +703,77 @@ function loadGame() {
 }
 
 
-/* TELEGRAM PLAYER */
+/* =========================================================
+   TELEGRAM USER
+========================================================= */
+
+function getTelegramUser() {
+
+  try {
+
+    if (
+      !window.Telegram ||
+      !window.Telegram.WebApp
+    ) {
+      return null;
+    }
+
+    const user =
+      window.Telegram.WebApp
+        .initDataUnsafe
+        .user;
+
+    return user || null;
+
+  } catch (e) {
+
+    console.error(
+      'Telegram user olish xatosi:',
+      e
+    );
+
+    return null;
+
+  }
+
+}
+
 
 function loadTelegramPlayer() {
 
   try {
 
     const user =
-      window.Telegram &&
-      window.Telegram.WebApp &&
-      window.Telegram.WebApp.initDataUnsafe &&
-      window.Telegram.WebApp.initDataUnsafe.user;
+      getTelegramUser();
 
-    if (!user) return;
+    if (!user) {
 
+      console.log(
+        'Telegram user topilmadi'
+      );
 
-    const name =
-      user.username
-        ? '@' + user.username
-        : [
-            user.first_name,
-            user.last_name
-          ]
-          .filter(Boolean)
-          .join(' ');
+      return;
 
+    }
+
+    let name = '';
+
+    if (user.username) {
+
+      name =
+        '@' + user.username;
+
+    } else {
+
+      name =
+        [
+          user.first_name,
+          user.last_name
+        ]
+        .filter(Boolean)
+        .join(' ');
+
+    }
 
     if (name) {
 
@@ -606,14 +782,17 @@ function loadTelegramPlayer() {
       ).textContent =
         'PLAYER: ' + name;
 
+      console.log(
+        'Player:',
+        name
+      );
+
     }
 
-  }
+  } catch (e) {
 
-  catch (e) {
-
-    console.log(
-      'Telegram player error:',
+    console.error(
+      'Player load xatosi:',
       e
     );
 
@@ -622,58 +801,96 @@ function loadTelegramPlayer() {
 }
 
 
-loadTelegramPlayer();
-
-
-/* PLAYER NAME */
-
 function getPlayerName() {
 
   try {
 
     const user =
-      window.Telegram &&
-      window.Telegram.WebApp &&
-      window.Telegram.WebApp.initDataUnsafe &&
-      window.Telegram.WebApp.initDataUnsafe.user;
+      getTelegramUser();
 
     if (user) {
 
-      return user.username
-        ? '@' + user.username
-        : [
-            user.first_name,
-            user.last_name
-          ]
-          .filter(Boolean)
-          .join(' ');
+      if (user.username) {
+
+        return '@' + user.username;
+
+      }
+
+      const fullName =
+        [
+          user.first_name,
+          user.last_name
+        ]
+        .filter(Boolean)
+        .join(' ');
+
+      if (fullName) {
+
+        return fullName;
+
+      }
 
     }
 
-  }
+  } catch (e) {
 
-  catch (e) {}
+    console.error(
+      'Player name xatosi:',
+      e
+    );
+
+  }
 
   return 'Guest';
 
 }
 
 
-/* TELEGRAM INIT DATA */
+/* =========================================================
+   TELEGRAM INIT DATA
+========================================================= */
 
 function getTelegramInitData() {
 
   try {
 
-    return
-      window.Telegram &&
-      window.Telegram.WebApp
-        ? window.Telegram.WebApp.initData || ''
-        : '';
+    if (
+      !window.Telegram ||
+      !window.Telegram.WebApp
+    ) {
 
-  }
+      console.log(
+        'Telegram WebApp mavjud emas'
+      );
 
-  catch (e) {
+      return '';
+
+    }
+
+    const tg =
+      window.Telegram.WebApp;
+
+    console.log(
+      'Telegram WebApp:',
+      tg
+    );
+
+    console.log(
+      'initData:',
+      tg.initData
+    );
+
+    const initData =
+      tg.initData || '';
+
+    return initData;
+
+  } catch (e) {
+
+    console.error(
+      'initData olish xatosi:',
+      e
+    );
 
     return '';
 
@@ -682,18 +899,23 @@ function getTelegramInitData() {
 }
 
 
-/* SERVER SAVE */
+/* =========================================================
+   SEND GAME TO SERVER
+========================================================= */
 
 async function sendGameToBackend(
   elapsed,
-  combo
+  comboValue
 ) {
 
   const initData =
     getTelegramInitData();
 
 
-  /* TELEGRAM DATA YO'Q */
+  /*
+    Telegram ichida ochilgan bo‘lsa,
+    initData bo‘lishi kerak.
+  */
 
   if (!initData) {
 
@@ -701,7 +923,7 @@ async function sendGameToBackend(
       'SERVER: TELEGRAM DATA MISSING';
 
     console.log(
-      'INIT DATA YOQ'
+      'Telegram initData mavjud emas'
     );
 
     return;
@@ -711,11 +933,25 @@ async function sendGameToBackend(
 
   try {
 
+    console.log(
+      'Serverga yuborilmoqda...'
+    );
+
+    console.log(
+      'Elapsed:',
+      elapsed
+    );
+
+    console.log(
+      'Combo:',
+      comboValue
+    );
+
+
     const response =
       await fetch(
         GAME_API_URL,
         {
-
           method: 'POST',
 
           headers: {
@@ -723,26 +959,27 @@ async function sendGameToBackend(
               'application/json'
           },
 
-          body: JSON.stringify({
+          body:
+            JSON.stringify({
 
-            action: 'save_game',
+              action:
+                'save_game',
 
-            initData:
-              initData,
+              initData:
+                initData,
 
-            elapsed:
-              elapsed,
+              elapsed:
+                elapsed,
 
-            combo:
-              combo
+              combo:
+                comboValue
 
-          })
+            })
 
+          }
         }
       );
 
-
-    /* SERVER RESPONSE */
 
     const bodyText =
       await response.text();
@@ -765,40 +1002,40 @@ async function sendGameToBackend(
     try {
 
       data =
-        JSON.parse(bodyText);
+        JSON.parse(
+          bodyText
+        );
+
+    } catch (e) {
+
+      data = null;
 
     }
 
-    catch (e) {}
-
-
-    /* SUCCESS */
 
     if (response.ok) {
 
       result.textContent =
         'SERVER: SAVED ✓';
 
-    }
+      console.log(
+        'Game serverga saqlandi'
+      );
 
-    /* ERROR */
-
-    else {
+    } else {
 
       const reason =
         data &&
         data.error
-
           ? data.error
-
-          : bodyText
-
-            ? bodyText.substring(
-                0,
-                100
-              )
-
-            : 'NO_RESPONSE_BODY';
+          : (
+              bodyText
+                ? bodyText.substring(
+                    0,
+                    100
+                  )
+                : 'NO_RESPONSE_BODY'
+            );
 
 
       result.textContent =
@@ -807,17 +1044,21 @@ async function sendGameToBackend(
         ' · ' +
         reason;
 
+
+      console.error(
+        'Server xatosi:',
+        response.status,
+        reason
+      );
+
     }
 
-  }
-
-  catch (error) {
+  } catch (e) {
 
     console.error(
       'BACKEND CONNECTION ERROR:',
-      error
+      e
     );
-
 
     result.textContent =
       'SERVER: CONNECTION ERROR';
@@ -827,17 +1068,27 @@ async function sendGameToBackend(
 }
 
 
-/* TIMER DISPLAY */
+/* =========================================================
+   TIMER DISPLAY
+========================================================= */
 
-function display(t) {
+function display(time) {
+
+  if (!Number.isFinite(time)) {
+
+    time = 0;
+
+  }
 
   timer.textContent =
-    t.toFixed(3);
+    time.toFixed(3);
 
 }
 
 
-/* HISTORY */
+/* =========================================================
+   HISTORY
+========================================================= */
 
 function renderHistory() {
 
@@ -847,50 +1098,74 @@ function renderHistory() {
     );
 
 
+  if (!history.length) {
+
+    box.innerHTML =
+      '<div class="history-empty">' +
+      'Hali urinishlar yo‘q' +
+      '</div>';
+
+    return;
+
+  }
+
+
   box.innerHTML =
-    history.length
+    history
+      .map(
+        (item, i) => {
 
-      ? history
-          .map(
-            (item, i) =>
+          const time =
+            Number(item.time) || 0;
 
-              '<div class="history-row">' +
+          const success =
+            Boolean(item.success);
+
+
+          return (
+
+            '<div class="history-row">' +
 
               '<span>#' +
-              (history.length - i) +
-              ' -</span>' +
+                (history.length - i) +
+                ' -</span>' +
 
               '<b class="' +
-              (item.success
-                ? 'ok'
-                : 'bad') +
+                (success
+                  ? 'ok'
+                  : 'bad') +
               '">' +
 
-              item.time.toFixed(3) +
+                time.toFixed(3) +
 
               '</b>' +
 
               '<span style="margin-left:10px">' +
 
-              'sekund ' +
+                'sekund ' +
 
-              (item.success
-                ? '🟢'
-                : '🔴') +
+                (
+                  success
+                    ? '🟢'
+                    : '🔴'
+                ) +
 
               '</span>' +
 
-              '</div>'
+            '</div>'
 
-          )
-          .join('')
+          );
 
-      : '<div class="history-empty">Hali urinishlar yo‘q</div>';
+        }
+      )
+      .join('');
 
 }
 
 
-/* LEADERBOARD */
+/* =========================================================
+   LEADERBOARD
+========================================================= */
 
 function renderLeaderboard() {
 
@@ -907,55 +1182,108 @@ function renderLeaderboard() {
     .sort(
       (a, b) => {
 
+        const aSuccess =
+          Number(a[1].successes) || 0;
+
+        const bSuccess =
+          Number(b[1].successes) || 0;
+
+
         if (
-          b[1].successes !==
-          a[1].successes
+          bSuccess !==
+          aSuccess
         ) {
 
-          return
-            b[1].successes -
-            a[1].successes;
+          return (
+            bSuccess -
+            aSuccess
+          );
 
         }
 
 
-        return
-          a[1].best -
-          b[1].best;
+        const aBest =
+          Number(a[1].best);
+
+        const bBest =
+          Number(b[1].best);
+
+
+        return (
+          (Number.isFinite(aBest)
+            ? aBest
+            : 999) -
+          (Number.isFinite(bBest)
+            ? bBest
+            : 999)
+        );
 
       }
     )
     .slice(0, 10);
 
 
+  if (!rows.length) {
+
+    box.innerHTML =
+      '<div class="history-empty">' +
+      'Hali rekordlar yo‘q' +
+      '</div>';
+
+    renderAdmin();
+
+    return;
+
+  }
+
+
   box.innerHTML =
-    rows.length
+    rows
+      .map(
+        (entry, i) => {
 
-      ? rows
-          .map(
-            (entry, i) =>
+          const successes =
+            Number(
+              entry[1].successes
+            ) || 0;
 
-              '<div class="leader-row">' +
+          const bestScore =
+            Number(
+              entry[1].best
+            );
+
+          const safeBest =
+            Number.isFinite(
+              bestScore
+            )
+              ? bestScore
+              : 0;
+
+
+          return (
+
+            '<div class="leader-row">' +
 
               '<span>#' +
-              (i + 1) +
-              ' ' +
-              entry[0] +
+                (i + 1) +
+                ' ' +
+                entry[0] +
               '</span>' +
 
               '<b>' +
-              entry[1].successes +
-              ' ta · ' +
-              entry[1].best.toFixed(3) +
-              's' +
+                successes +
+                ' ta · ' +
+                safeBest.toFixed(3) +
+                's' +
               '</b>' +
 
-              '</div>'
+            '</div>'
 
-          )
-          .join('')
+          );
 
-      : '<div class="history-empty">Hali rekordlar yo‘q</div>';
+        }
+      )
+      .join('');
 
 
   renderAdmin();
@@ -963,7 +1291,9 @@ function renderLeaderboard() {
 }
 
 
-/* ADMIN */
+/* =========================================================
+   ADMIN LOCAL STATS
+========================================================= */
 
 function renderAdmin() {
 
@@ -978,11 +1308,17 @@ function renderAdmin() {
       playerRecords
     )
     .reduce(
-      (sum, p) =>
-        sum +
-        (p.attempts ||
-         p.successes ||
-         0),
+      (sum, p) => {
+
+        return (
+          sum +
+          (
+            Number(p.attempts) ||
+            0
+          )
+        );
+
+      },
       0
     );
 
@@ -992,9 +1328,17 @@ function renderAdmin() {
       playerRecords
     )
     .reduce(
-      (sum, p) =>
-        sum +
-        (p.successes || 0),
+      (sum, p) => {
+
+        return (
+          sum +
+          (
+            Number(p.successes) ||
+            0
+          )
+        );
+
+      },
       0
     );
 
@@ -1025,7 +1369,9 @@ function renderAdmin() {
 }
 
 
-/* RESET */
+/* =========================================================
+   RESET VISUAL
+========================================================= */
 
 function resetVisual() {
 
@@ -1040,17 +1386,27 @@ function resetVisual() {
 }
 
 
-/* TIMER LOOP */
+/* =========================================================
+   TIMER LOOP
+========================================================= */
 
 function tick() {
 
-  if (!running) return;
+  if (!running) {
+
+    return;
+
+  }
 
 
-  display(
-    (performance.now() -
-      startTime) / 1000
-  );
+  const elapsed =
+    (
+      performance.now() -
+      startTime
+    ) / 1000;
+
+
+  display(elapsed);
 
 
   raf =
@@ -1061,12 +1417,13 @@ function tick() {
 }
 
 
-/* START */
+/* =========================================================
+   START
+========================================================= */
 
 function start() {
 
   running = true;
-
 
   startTime =
     performance.now();
@@ -1075,10 +1432,8 @@ function start() {
   tap.className =
     'running';
 
-
   tap.textContent =
     'STOP';
-
 
   result.textContent =
     '...';
@@ -1097,7 +1452,9 @@ function start() {
 }
 
 
-/* STOP */
+/* =========================================================
+   STOP
+========================================================= */
 
 function stop() {
 
@@ -1110,13 +1467,13 @@ function stop() {
 
 
   const elapsed =
-    (performance.now() -
-      startTime) / 1000;
+    (
+      performance.now() -
+      startTime
+    ) / 1000;
 
 
-  display(
-    elapsed
-  );
+  display(elapsed);
 
 
   attempts++;
@@ -1127,14 +1484,13 @@ function stop() {
 
 
   /*
-    0.990 - 1.010
-    INCLUDING 0.995
-    INCLUDING 1.005
+    SUCCESS:
+    0.990 <= elapsed <= 1.010
   */
 
   const success =
-    elapsed >= 0.990 &&
-    elapsed <= 1.010;
+    elapsed >= MIN_SUCCESS_TIME &&
+    elapsed <= MAX_SUCCESS_TIME;
 
 
   history.unshift({
@@ -1149,7 +1505,8 @@ function stop() {
 
 
   if (
-    history.length > 50
+    history.length >
+    50
   ) {
 
     history.pop();
@@ -1160,7 +1517,9 @@ function stop() {
   renderHistory();
 
 
-  /* SUCCESS */
+  /* =====================================================
+     SUCCESS
+  ===================================================== */
 
   if (success) {
 
@@ -1168,7 +1527,8 @@ function stop() {
 
 
     if (
-      combo > bestCombo
+      combo >
+      bestCombo
     ) {
 
       bestCombo =
@@ -1177,21 +1537,15 @@ function stop() {
     }
 
 
-    document.getElementById(
-      'combo'
-    ).textContent =
+    comboEl.textContent =
       combo;
 
-
-    document.getElementById(
-      'bestCombo'
-    ).textContent =
+    bestComboEl.textContent =
       bestCombo;
 
 
     tap.className =
       'success';
-
 
     tap.textContent =
       '1 SECOND!';
@@ -1203,22 +1557,21 @@ function stop() {
   }
 
 
-  /* FAIL */
+  /* =====================================================
+     FAIL
+  ===================================================== */
 
   else {
 
     combo = 0;
 
 
-    document.getElementById(
-      'combo'
-    ).textContent =
+    comboEl.textContent =
       combo;
 
 
     tap.className =
       'fail';
-
 
     tap.textContent =
       'RETRY';
@@ -1238,7 +1591,9 @@ function stop() {
   }
 
 
-  /* BEST */
+  /* =====================================================
+     BEST SCORE
+  ===================================================== */
 
   const score =
     Math.abs(
@@ -1262,7 +1617,9 @@ function stop() {
   }
 
 
-  /* PLAYER RECORD */
+  /* =====================================================
+     PLAYER RECORD
+  ===================================================== */
 
   const player =
     getPlayerName();
@@ -1278,7 +1635,9 @@ function stop() {
 
       attempts: 0,
 
-      best: 999
+      best: 999,
+
+      bestCombo: 0
 
     };
 
@@ -1306,13 +1665,30 @@ function stop() {
   }
 
 
+  if (
+    combo >
+    (
+      playerRecords[player].bestCombo ||
+      0
+    )
+  ) {
+
+    playerRecords[player].bestCombo =
+      combo;
+
+  }
+
+
   renderLeaderboard();
 
 
   saveGame();
 
 
-  /* SEND TO SUPABASE */
+  /*
+    MUHIM:
+    Serverga ham yuboramiz.
+  */
 
   sendGameToBackend(
     elapsed,
@@ -1322,7 +1698,9 @@ function stop() {
 }
 
 
-/* BUTTON ACTION */
+/* =========================================================
+   MAIN ACTION
+========================================================= */
 
 function action() {
 
@@ -1332,7 +1710,6 @@ function action() {
       tap.classList.contains(
         'success'
       ) ||
-
       tap.classList.contains(
         'fail'
       )
@@ -1345,9 +1722,7 @@ function action() {
 
     start();
 
-  }
-
-  else {
+  } else {
 
     stop();
 
@@ -1356,7 +1731,9 @@ function action() {
 }
 
 
-/* CLICK */
+/* =========================================================
+   BUTTON CLICK
+========================================================= */
 
 tap.addEventListener(
   'click',
@@ -1364,15 +1741,40 @@ tap.addEventListener(
 );
 
 
-/* SPACE */
+/* =========================================================
+   SPACE KEY
+========================================================= */
 
 document.addEventListener(
   'keydown',
-  e => {
+  function(e) {
 
     if (
       e.code === 'Space'
     ) {
+
+      /*
+        Input/select kabi elementlarda
+        keraksiz ishlamasligi uchun.
+      */
+
+      const tag =
+        e.target &&
+        e.target.tagName
+          ? e.target.tagName
+          : '';
+
+
+      if (
+        tag === 'INPUT' ||
+        tag === 'TEXTAREA' ||
+        tag === 'SELECT'
+      ) {
+
+        return;
+
+      }
+
 
       e.preventDefault();
 
@@ -1384,9 +1786,31 @@ document.addEventListener(
 );
 
 
-/* LOAD */
+/* =========================================================
+   INITIAL LOAD
+========================================================= */
+
+loadTelegramPlayer();
 
 loadGame();
+
+
+/*
+  Telegram ba'zan user/initData ni
+  WebView ishga tushgandan keyin beradi.
+  Shuning uchun yana bir marta tekshiramiz.
+*/
+
+setTimeout(
+  function() {
+
+    initTelegram();
+
+    loadTelegramPlayer();
+
+  },
+  300
+);
 
 </script>
 
